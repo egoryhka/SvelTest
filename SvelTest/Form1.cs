@@ -17,6 +17,7 @@ namespace SvelTest
         {
             InitializeComponent();
             InitializeMenuStrip();
+            InitializeTextBoxT9();
         }
 
         private void InitializeMenuStrip()
@@ -45,6 +46,19 @@ namespace SvelTest
             DictionaryToolStripMenuItem.DropDownItems.Add(ClearWordDictionary);
         }
 
+        private void InitializeTextBoxT9()
+        {
+            foreach (Control c in Controls)
+            {
+                TextBox textBox = c as TextBox;
+                if (textBox != null)
+                {
+                    textBox.KeyDown += TextBox_KeyDown;
+                    textBox.TextChanged += TextBox_TextChanged;
+                }
+            }
+        }
+
         private string OpenFile()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -70,7 +84,7 @@ namespace SvelTest
             }
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void TextBox_TextChanged(object sender, EventArgs e)
         {
             TextBox box = (sender as TextBox);
             if (suggestedWordWasInserted)
@@ -91,8 +105,8 @@ namespace SvelTest
                 suggestedWordsList.SelectedIndex = 0;
                 suggestedWordsList.Visible = true;
                 var position = box.GetPositionFromCharIndex(box.Text.Length - 1);
-                position.Y += 50;
-                position.X += 25;
+                position.Offset(25, 25);
+                position.Offset(box.Location.X, box.Location.Y);
                 suggestedWordsList.Location = position;
             }
             else
@@ -114,7 +128,7 @@ namespace SvelTest
             }
         }
 
-        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
         {
             TextBox box = (sender as TextBox);
 
@@ -138,5 +152,7 @@ namespace SvelTest
                 }
             }
         }
+
+
     }
 }
