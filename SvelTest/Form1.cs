@@ -55,6 +55,7 @@ namespace SvelTest
                 {
                     textBox.KeyDown += TextBox_KeyDown;
                     textBox.TextChanged += TextBox_TextChanged;
+                    textBox.Enter += TextBox_EnterFocus;
                 }
             }
         }
@@ -87,6 +88,8 @@ namespace SvelTest
         private void TextBox_TextChanged(object sender, EventArgs e)
         {
             TextBox box = (sender as TextBox);
+            if (box == null) return;
+
             if (suggestedWordWasInserted)
             {
                 box.Text = box.Text.TrimEnd('\n').TrimEnd('\r');
@@ -94,25 +97,7 @@ namespace SvelTest
                 suggestedWordWasInserted = false;
             }
 
-            UpdateLastWord(box);
-            var suggestedWords = WordDictionaryManager.GetSuggestedWords(lastWord);
-
-            suggestedWordsList.Items.Clear();
-            suggestedWordsList.Items.AddRange(suggestedWords);
-
-            if (suggestedWordsList.Items.Count > 0)
-            {
-                suggestedWordsList.SelectedIndex = 0;
-                suggestedWordsList.Visible = true;
-                var position = box.GetPositionFromCharIndex(box.Text.Length - 1);
-                position.Offset(25, 25);
-                position.Offset(box.Location.X, box.Location.Y);
-                suggestedWordsList.Location = position;
-            }
-            else
-            {
-                suggestedWordsList.Visible = false;
-            }
+            UpdateSuggestedWords(box);
 
             if (box.Text.Length > 0)
             {
@@ -131,6 +116,7 @@ namespace SvelTest
         private void TextBox_KeyDown(object sender, KeyEventArgs e)
         {
             TextBox box = (sender as TextBox);
+            if (box == null) return;
 
             if (suggestedWordsList.Items.Count > 0)
             {
@@ -150,9 +136,41 @@ namespace SvelTest
                     if (suggestedWordsList.SelectedIndex < suggestedWordsList.Items.Count - 1)
                         suggestedWordsList.SelectedIndex++;
                 }
+                e.Handled = true;
             }
         }
 
+        private void TextBox_EnterFocus(object sender, EventArgs e)
+        {
+            TextBox box = (sender as TextBox);
+            if (box == null) return;
 
+            UpdateSuggestedWords(box);
+        }
+
+
+        private void UpdateSuggestedWords(TextBox box)
+        {
+            UpdateLastWord(box);
+
+            var suggestedWords = WordDictionaryManager.GetSuggestedWords(lastWord);
+
+            suggestedWordsList.Items.Clear();
+            suggestedWordsList.Items.AddRange(suggestedWords);
+
+            if (suggestedWordsList.Items.Count > 0)
+            {
+                suggestedWordsList.SelectedIndex = 0;
+                suggestedWordsList.Visible = true;
+                var position = box.GetPositionFromCharIndex(box.Text.Length - 1);
+                position.Offset(25, 25);
+                position.Offset(box.Location.X, box.Location.Y);
+                suggestedWordsList.Location = position;
+            }
+            else
+            {
+                suggestedWordsList.Visible = false;
+            }
+        }
     }
 }
